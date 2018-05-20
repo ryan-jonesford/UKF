@@ -1,0 +1,38 @@
+# silly macOS
+.DS_Store
+
+# build files
+build/
+
+# editor config
+.vscode/
+
+# Xcode
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+*.moved-aside
+*.xccheckout
+*.xcscmblueprint
+ide_profiles/xcode/Debug/
+ide_profiles/xcode/ExtendedKF.build/
+install-ubuntu.sh
+data/obj_pose-laser-radar-synthetic-input.txt
+install-ubuntu.sh
+data/obj_pose-laser-radar-synthetic-input.txt
+
+build/
+
+src/Inc/Eigen/
+src/json.hpp
+LICENSE
+cmakepatch.txt
+Docs/Data_Flow_Doc.txt
+Docs/Input_Output File Format.txt
+Docs/EKF_map.png
