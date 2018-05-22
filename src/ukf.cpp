@@ -60,13 +60,6 @@ UKF::UKF() {
   Hint: one or more values initialized above might be wildly off...
   */
 
-  F_ = MatrixXd(5,5);
-  F_ <<  1, 0, 0, 0, 0,
-         0, 1, 0, 0, 0,
-         0, 0, 1, 0, 0,
-         0, 0, 0, 1, 0, 
-         0, 0, 0, 0, 1; 
-
   // State dimension
   n_x_ = 5;
 
@@ -78,9 +71,17 @@ UKF::UKF() {
 
   srt_lambda_n_aug_ = sqrt(lambda_ + n_aug_);
 
-  // Initalize the predicted and generated sigma points matrix
-  Xsig_pred_ = MatrixXd::Zero( n_aug_, 2 * n_aug_ + 1 );
-  Xsig_gen_ =  MatrixXd::Zero( n_aug_, 2 * n_aug_ + 1 );
+  //set weights
+  weights = VectorXd::Zero(2*n_aug_+1);
+  weights(0) = lambda_/(lambda_+n_aug_);
+  for(int i = 1; i < 2*n_aug_+1; ++i)
+  {
+      weights(i) = 1/(2*(lambda_ + n_aug_));
+  }
+
+  // Initalize the predicted and augmented sigma points matrix
+  Xsig_pred_ = MatrixXd::Zero( n_x_, 2 * n_aug_ + 1 );
+  Xsig_aug_ =  MatrixXd::Zero( n_aug_, 2 * n_aug_ + 1 );
 }
 
 UKF::~UKF() {}
@@ -102,19 +103,6 @@ void UKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
   // get time step in seconds
   double dt_1 = get_dt(measurement_pack);
-
-  // update the F matrix for the prediction step
-  F_(0,2) = (1/x_(3))*(sin(x_(3)+x_(4)*dt_1) - sin(x_(3)));
-  F_(1,2) = (1/x_(3))*(-cos(x_(3)+x_(4)*dt_1) + cos(x_(3)));
-  F_(4,4) = dt_1;
-
-  double dt_2 = dt_1  * dt_1;
-  //update the process noise matrix
-  u_ << .5 * dt_2 * cos(x_(3)),
-        .5 * dt_2 * sin(x_(3)),
-        dt_1 * x_(2),
-        .5 * dt_2 * x_(4),
-        dt_1 * x_(4);
   
   PredictUKF(dt_1);
 }
@@ -124,7 +112,7 @@ void UKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
  * @param {double} delta_t the change in time (in seconds) between the last
  * measurement and this one.
  */
-void UKF::PredictUKF(double dt) {
+void UKF::PredictUKF(double dt_1) {
   /**
   TODO:
 
@@ -157,15 +145,66 @@ void UKF::PredictUKF(double dt) {
   A = A.llt().matrixL();
 
   verbosity("Generating the sigma points");  
-  verbosity("Setting x_ to the first column of Xsig_gen_");
-  Xsig_gen_.col(0).head(n_x_)  = x_;
+  verbosity("Setting x_ to the first column of Xsig_aug_");
+  Xsig_aug_.col(0).head(n_x_)  = x_;
 
-  verbosity("Setting the remaining sigma poitns to Xsig_gen_");
+  verbosity("Setting the remaining sigma poitns to Xsig_aug_");
   for (int i = 0; i < n_aug_; i++)
   {
-    Xsig_gen_.col(i+1)        = x_aug + srt_lambda_n_aug_ * A.col(i);
-    Xsig_gen_.col(i+1+n_aug_) = x_aug - srt_lambda_n_aug_ * A.col(i);
+    Xsig_aug_.col(i+1)        = x_aug + srt_lambda_n_aug_ * A.col(i);
+    Xsig_aug_.col(i+1+n_aug_) = x_aug - srt_lambda_n_aug_ * A.col(i);
   } 
+
+  double dt_2 = dt_1  * dt_1;
+
+  verbosity("Making prediction for the Sigma Points");
+  for( int i = 0; i < 2 * n_aug_ + 1; ++i)
+  {
+      // get first 5 rows of column i set = to vector x
+      VectorXd x  = Xsig_aug_.block(0,i,n_x_,1);
+      VectorXd x_pred = VectorXd(n_x_);
+      VectorXd x_noise = VectorXd(n_x_);
+      // Avoiding divide by zero
+      if( x(4) ){
+          x_pred << (x(2)/x(4))*(sin(x(3)+x(4)*dt_1) - sin(x(3))),
+                    (x(2)/x(4))*(-cos(x(3)+x(4)*dt_1) + cos(x(3))),
+                    0,
+                    dt_1 * x(4),
+                    0;
+      }
+      else{
+          x_pred << x(2) * cos(x(3)) * dt_1,
+                    x(2) * sin(x(3)) * dt_1,
+                    0,
+                    0,
+                    0;
+      }
+      x_noise <<.5 * dt_2 * cos(x(3)) * Xsig_aug_(n_x_,i),
+                .5 * dt_2 * sin(x(3)) * Xsig_aug_(n_x_,i),
+                dt_1 * Xsig_aug_(n_x_,i),
+                .5 * dt_2 * Xsig_aug_(n_x_+1,i),
+                dt_1 * Xsig_aug_(n_x_+1,i);
+      // Add the vectors up and put them into column i of predicted sigma pts          
+      Xsig_pred_.col(i) = x+x_pred+x_noise; 
+  }
+
+  x_.setZero();
+  P_.setZero();
+  verbosity("Predicting the state mean");
+  for( int i = 0; i < 2*n_aug_+1; ++i)
+  {
+      x_ += Xsig_pred_.col(i)*weights(i);
+  }
+  
+  verbosity("Predicting state covariance matrix");
+  for( int i = 0; i < 2*n_aug_+1; ++i)
+  {
+      VectorXd F = VectorXd(n_x_);
+      F = Xsig_pred_.col(i)-x_;
+      while (F(3)> M_PI) F(3)-=2.*M_PI;
+      while (F(3)<-M_PI) F(3)+=2.*M_PI;
+      P_ += weights(i) * F * F.transpose();
+  }
 
 }
 

@@ -23,10 +23,13 @@ class UKF: public KalmanFilter {
     virtual ~UKF();
 
     ///* generate sigma points matrix
-    MatrixXd Xsig_gen_;
+    MatrixXd Xsig_aug_;
 
     ///* predicted sigma points matrix
     MatrixXd Xsig_pred_;
+
+    ///* predicted sigma point weights
+    VectorXd weights;
 
     ///* time when the state is true, in us
     long long time_us_;
