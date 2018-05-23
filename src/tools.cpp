@@ -103,11 +103,12 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
 VectorXd Tools::PolarToCartesian(const VectorXd& polar){
 	double rho = polar(0);
 	double phi = polar(1);
-	double px = cos(phi) + rho;
-	double py = sin(phi) + rho;
+	double px  = cos(phi) + rho;
+	double py  = sin(phi) + rho;
+
     VectorXd cartesian = VectorXd(2);
-	cartesian(0) = px;
-	cartesian(1) = py;
+	cartesian(0) 	   = px;
+	cartesian(1) 	   = py;
 	return cartesian;
 }
 
@@ -117,30 +118,61 @@ VectorXd Tools::PolarToCartesian(const VectorXd& polar){
  * Description: Convert cartesian coords to Polar
 **/
 VectorXd Tools::CartesianToPolar(const VectorXd& cartesian){
+	double px 	= 0, py	  = 0;
+	double vx	= 0, vy   = 0, v = 0;
+	double psi 	= 0;
+	
+	
 	// grab the cartesian coords
-	double px = cartesian(0);
-	double py = cartesian(1);
-	double vx = cartesian(2);
-	double vy = cartesian(3);
+	if ( cartesian.size() == 4 ) //EKF
+	{
+		px = cartesian(0);
+		py = cartesian(1);
+		vx = cartesian(2);
+		vy = cartesian(3);
+	}
+	else if(cartesian.size() == 5 ) // UKF
+	{
+		px   = cartesian(0);
+		py   = cartesian(1);
+		v    = cartesian(2);
+		psi  = cartesian(3);
+		// psid = cartesian(4) ...but ignore it, it's not used
+	}
+	else
+	{
+		cerr << "Tools::CartesianToPolar: Cartesian vector "
+		        "has invalid number of elemnts!! Bailing out." << endl;
+		exit(1);
+	}
 
 	// setup to convert to polar
 	double px2py2 = px*px+py*py;
 	//check division by (or close to) zero
 	if( fabs(px2py2) < 0.0001 )
   	{
-		cout << "Tools::CalculateJacobian: Division by Zero detected!! Bailing out." << endl;
+		cerr << "Tools::CartesianToPolar: Division by Zero detected!! Bailing out." << endl;
 		exit(1);
 	}
 	double sqrt_px2_py2 = sqrt(px2py2);
 
-	// normalize angle between -pi and pi
+	// take atan, normalized between -pi and pi
 	double atan__py_div_px = atan2(py,px);
 	
 	// populate the polar vector and return
 	VectorXd polar = VectorXd(3);
-	polar << 	sqrt_px2_py2,
-				atan__py_div_px,
-				( px*vx + py*vy ) / sqrt_px2_py2;
+	if ( cartesian.size() == 4 ) //EKF
+	{
+		polar << sqrt_px2_py2,
+				 atan__py_div_px,
+				 ( px*vx + py*vy ) / sqrt_px2_py2;
+	}
+	else // UKF
+	{
+		polar << sqrt_px2_py2,
+			     atan__py_div_px,
+			     ( px*cos(psi)*v + py*sin(psi)*v ) / sqrt_px2_py2;
+	}
 
 	return polar;
 }

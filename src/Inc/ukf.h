@@ -64,6 +64,9 @@ class UKF: public KalmanFilter {
     ///* Augmented state dimension
     int n_aug_;
 
+    ///* Radar measurement direction
+    int n_z_;
+
     ///* Sigma point spreading parameter
     double lambda_;
 

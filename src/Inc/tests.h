@@ -10,8 +10,8 @@
 
 class Tests {
     public:
-
     bool test_PredictUKF( void );
+    bool test_UpdateRadar( void );
 };
 
 #endif /* TESTS_H */

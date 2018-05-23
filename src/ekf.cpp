@@ -165,16 +165,16 @@ void EKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 **/
 void EKF::UpdateEKF(const VectorXd &z) {
 	VectorXd z_pred = tools.CartesianToPolar(x_);;
-  	MatrixXd y  	= z - z_pred;
-	y(1) 			= tools.normalizePhi(y(1));
-	MatrixXd Ht 	= H_.transpose();
-  	MatrixXd S  	= H_ * P_ * Ht + R_;
+  MatrixXd y  	  = z - z_pred;
+	y(1) 			      = tools.normalizePhi(y(1));
+  MatrixXd Ht 	  = H_.transpose();
+  MatrixXd S  	  = H_ * P_ * Ht + R_;
 	MatrixXd PHt    = P_ * Ht;
 	MatrixXd K      = PHt * S.inverse();
 
 	//new estimate
-	x_ 			= x_ + (K * y);
+	x_ 			    = x_ + (K * y);
 	int x_size 	= x_.size();
 	MatrixXd I 	= MatrixXd::Identity(x_size, x_size);
-	P_ 			= (I - K * H_) * P_;
+	P_ 			    = (I - K * H_) * P_;
 }

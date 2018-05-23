@@ -108,3 +108,102 @@ bool Tests::test_PredictUKF( void ){
 
     return passed;
 }
+
+bool Tests::test_UpdateRadar( void ){
+    bool passed = true;
+    UKF ukf;
+    ukf.verbose_ = true;
+
+    //set state dimension
+    int n_x = 5;
+
+    //set augmented dimension
+    int n_aug = 7;
+
+    //set measurement dimension, radar can measure r, phi, and r_dot
+    int n_z = 3;
+
+    //define spreading parameter
+    double lambda = 3 - n_aug;
+
+    //set vector for weights
+    VectorXd weights = VectorXd(2*n_aug+1);
+      double weight_0 = lambda/(lambda+n_aug);
+    weights(0) = weight_0;
+    for (int i=1; i<2*n_aug+1; i++) {  //2n+1 weights
+      double weight = 0.5/(n_aug+lambda);
+      weights(i) = weight;
+    }
+
+    //create example matrix with predicted sigma points
+    ukf.Xsig_pred_ <<
+           5.9374,  6.0640,   5.925,  5.9436,  5.9266,  5.9374,  5.9389,  5.9374,  5.8106,  5.9457,  5.9310,  5.9465,  5.9374,  5.9359,  5.93744,
+             1.48,  1.4436,   1.660,  1.4934,  1.5036,    1.48,  1.4868,    1.48,  1.5271,  1.3104,  1.4787,  1.4674,    1.48,  1.4851,    1.486,
+            2.204,  2.2841,  2.2455,  2.2958,   2.204,   2.204,  2.2395,   2.204,  2.1256,  2.1642,  2.1139,   2.204,   2.204,  2.1702,   2.2049,
+           0.5367, 0.47338, 0.67809, 0.55455, 0.64364, 0.54337,  0.5367, 0.53851, 0.60017, 0.39546, 0.51900, 0.42991, 0.530188,  0.5367, 0.535048,
+            0.352, 0.29997, 0.46212, 0.37633,  0.4841, 0.41872,   0.352, 0.38744, 0.40562, 0.24347, 0.32926,  0.2214, 0.28687,   0.352, 0.318159;
+
+    //create example vector for predicted state mean
+    ukf.x_ <<
+       5.93637,
+       1.49035,
+       2.20528,
+      0.536853,
+      0.353577;
+
+    //create example matrix for predicted state covariance
+    ukf.P_ <<
+    0.0054342,  -0.002405,  0.0034157, -0.0034819, -0.00299378,
+    -0.002405,    0.01084,   0.001492,  0.0098018,  0.00791091,
+    0.0034157,   0.001492,  0.0058012, 0.00077863, 0.000792973,
+ -  0.0034819,  0.0098018, 0.00077863,   0.011923,   0.0112491,
+ -  0.0029937,  0.0079109, 0.00079297,   0.011249,   0.0126972;
+
+    //create example vector for incoming radar measurement
+    VectorXd z = VectorXd(n_z);
+    z <<
+        5.9214,
+        0.2187,
+        2.0062;
+
+    MeasurementPackage meas_package;
+    meas_package.sensor_type_ = MeasurementPackage::RADAR;
+    meas_package.raw_measurements_ = z;
+
+    VectorXd expected_x =VectorXd(5);
+    expected_x << 5.92276,
+                  1.41823,
+                  2.15593,
+                  0.489274,
+                  0.321338;
+    MatrixXd expected_P = MatrixXd(5,5);
+    expected_P <<  0.00361579, -0.000357881, 0.00208316, -0.000937196, -0.00071727,
+                  -0.000357881, 0.00539867, 0.00156846, 0.00455342, 0.00358885,
+                   0.00208316, 0.00156846, 0.00410651, 0.00160333, 0.00171811,
+                  -0.000937196, 0.00455342, 0.00160333, 0.00652634, 0.00669436,
+                  -0.00071719, 0.00358884, 0.00171811, 0.00669426, 0.00881797;
+
+    //radar measurement noise standard deviation radius in m
+    ukf.std_radr_ = 0.3;
+
+    //radar measurement noise standard deviation angle in rad
+    ukf.std_radphi_ = 0.0175;
+
+    //radar measurement noise standard deviation radius change in m/s
+    ukf.std_radrd_ = 0.1;
+
+    cout << "***running UpdateRadar***"<<endl;
+    ukf.UpdateRadar(meas_package);
+    cout << "***Comparing Results***"<<endl;
+    for(int i=0; i < 5; ++i)
+    {
+        if( round(expected_x(i)*1000) != round(ukf.x_(i)*1000) )
+        {
+            cout<<"expected_x("<<i<<") does not equal ukf.x_("
+                <<i<<")"<<endl;
+            cout << expected_x(i) << " != " << ukf.x_(i)<<endl;
+            passed = false;
+        }
+    }
+    return passed;
+}

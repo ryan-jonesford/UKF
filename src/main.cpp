@@ -41,19 +41,21 @@ KalmanFilter *kf_type(char * kf_flag){
   }
 }
 
+void run_test_UpdateRadar( KalmanFilter * KF ){
+  Tests test;
+  if(test.test_UpdateRadar()){
+    std::cout<<"UpdateRadar Passed\n"<<endl;
+  } else{
+    std::cout<<"UpdateRadar Failed\n"<<endl;          
+  }
+}
+
 void run_test_predictUKF( KalmanFilter * KF ){
   Tests test;
-  if(test.test_PredictUKF())
-  {
-    std::cout<<"PredictUKF Passed"<<endl;
-  }
-  else
-  {
-    std::cout<<"PredictUKF Failed"<<endl;          
-  }
-  if( KF != NULL)
-  {
-    delete KF;
+  if(test.test_PredictUKF()){
+    std::cout<<"PredictUKF Passed\n"<<endl;
+  } else{
+    std::cout<<"PredictUKF Failed\n"<<endl;          
   }
 }
 
@@ -82,6 +84,10 @@ int main(int argc, char* argv[])
       if( !strcmp(argv[inx],"-tu"))
       {
         run_test_predictUKF(KF);
+        run_test_UpdateRadar(KF);
+        if( KF != NULL ){
+          delete KF;
+        }
         return 0;
       }
 
