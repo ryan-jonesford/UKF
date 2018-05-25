@@ -66,6 +66,11 @@ public:
     void Update(const Eigen::VectorXd &z);
 
     /**
+     * Returns the type of kalman filter implemented
+     */
+    virtual const char* get_kf_type( void ){ return " "; }
+
+    /**
      * Run the whole flow of the Kalman Filter from here. Must be implemented by
      * children classes
      */
@@ -79,6 +84,10 @@ public:
 
     // if true, prints to console what it is doing
     bool verbose_;
+
+    // if true, prints the nis results to the console
+    bool print_nis_;
+    
 
   protected:
     Tools tools;

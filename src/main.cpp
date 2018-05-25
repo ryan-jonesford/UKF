@@ -32,11 +32,13 @@ std::string hasData(std::string s) {
 KalmanFilter *kf_type(char * kf_flag){
   if( !strcmp( kf_flag,"-e" ) )
     {
+      std::cout<<"Running EKF\n"<<endl;
       return new EKF();
     }
   //defalt to UKF    
   else //if( !strcmp( kf_flag, "-u" ) )
   {
+    std::cout<<"Running UKF\n"<<endl;
     return new UKF();
   }
 }
@@ -66,6 +68,10 @@ int main(int argc, char* argv[])
   // Create an output file
   bool logging = false;
   bool write_header = false;
+  bool be_verbose = false;
+  bool laser_only = false;
+  bool radar_only = false;
+  bool print_nis = false;
   KalmanFilter *KF;
   
   if ( argc > 1 )
@@ -90,13 +96,34 @@ int main(int argc, char* argv[])
         }
         return 0;
       }
-
+      if( !strcmp(argv[inx],"-v"))
+      {
+        be_verbose = true;
+      }
+      if( !strcmp(argv[inx],"-v"))
+      {
+        be_verbose = true;
+      }
+      if( !strcmp(argv[inx],"-r"))
+      {
+        radar_only = true;
+      }if( !strcmp(argv[inx],"-l"))
+      {
+        laser_only = true;
+      }
+      if( !strcmp(argv[inx], "-n")){
+        print_nis = true;
+      }
     }
   }
   else
   {
     KF = new UKF();
   }
+  KF->verbose_ = be_verbose;
+  KF->use_laser_ = laser_only;
+  KF->use_radar_ = radar_only;
+  KF->print_nis_ = print_nis;
 
 
 
@@ -206,17 +233,31 @@ int main(int argc, char* argv[])
           //Push the current estimated x,y positon from the Kalman filter's state vector
 
           VectorXd estimate(4);
+          double p_x, p_y, v, yaw, v1, v2;
 
-          double p_x = KF->x_(0);
-          double p_y = KF->x_(1);
-          double v1  = KF->x_(2);
-          double v2 = KF->x_(3);
+          if ( !strcmp(KF->get_kf_type(), "EKF") )
+          {
+            p_x = KF->x_(0);
+            p_y = KF->x_(1);
+            v1  = KF->x_(2);
+            v2  = KF->x_(3);
 
+          }
+          else
+          {
+            p_x = KF->x_(0);
+            p_y = KF->x_(1);
+            v   = KF->x_(2);
+            yaw = KF->x_(3);
+
+            v1 = cos(yaw)*v;
+            v2 = sin(yaw)*v;
+          }
           estimate(0) = p_x;
           estimate(1) = p_y;
           estimate(2) = v1;
           estimate(3) = v2;
-          
+
           estimations.push_back(estimate);
 
           VectorXd RMSE = tools.CalculateRMSE(estimations, ground_truth);

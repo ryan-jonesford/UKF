@@ -114,9 +114,6 @@ bool Tests::test_UpdateRadar( void ){
     UKF ukf;
     ukf.verbose_ = true;
 
-    //set state dimension
-    int n_x = 5;
-
     //set augmented dimension
     int n_aug = 7;
 
@@ -193,7 +190,7 @@ bool Tests::test_UpdateRadar( void ){
     ukf.std_radrd_ = 0.1;
 
     cout << "***running UpdateRadar***"<<endl;
-    ukf.UpdateRadar(meas_package);
+    ukf.UpdateRadar(meas_package.raw_measurements_);
     cout << "***Comparing Results***"<<endl;
     for(int i=0; i < 5; ++i)
     {

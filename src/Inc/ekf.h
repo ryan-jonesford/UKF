@@ -30,6 +30,11 @@ public:
    */
   void UpdateEKF(const Eigen::VectorXd &z);
 
+  /**
+   * Returns the type of kalman filter implemented
+   */
+  const char* get_kf_type(void);
+  
 private: 
 
   Eigen::MatrixXd R_laser_;
