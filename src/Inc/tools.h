@@ -51,6 +51,9 @@ class Tools {
     LASER,
   };
 
+/**
+   * A method to track nis values and print them to the console
+   */
   void track_nis(Sensor_type sensor_type, const VectorXd& pred,
                  const VectorXd& actual, const MatrixXd& S);
 

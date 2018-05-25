@@ -172,6 +172,11 @@ VectorXd Tools::CartesianToPolar(const VectorXd& cartesian) {
   return polar;
 }
 
+/**
+ * Name: normalizePhi
+ * Return: normalized angle expressed as double
+ * Description: normalizes an angle between -pi and pi
+ **/
 double Tools::normalizePhi(double phi) {
   while (phi < -M_PI) {
     phi += 2 * M_PI;
@@ -187,6 +192,12 @@ double Tools::normalizePhi(double phi) {
   return phi;
 }
 
+
+/**
+ * Name: track_nis
+ * Return: None
+ * Description: Tracks nis values and prints them to the console
+ **/
 void Tools::track_nis(Sensor_type sensor_type, const VectorXd& pred,
                       const VectorXd& actual, const MatrixXd& S) {
   double nis_3d = 7.81;

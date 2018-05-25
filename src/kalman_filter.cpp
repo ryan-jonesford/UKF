@@ -76,6 +76,11 @@ double KalmanFilter::get_dt(const MeasurementPackage &measurement_pack) {
   return dt;
 }
 
+/**
+ * Name: verbosity
+ * Return: None
+ * Description: Prints @param statement to the console if verbose_ is true
+ **/
 void KalmanFilter::verbosity(const char *statement) {
   if (verbose_) {
     cout << statement << endl;

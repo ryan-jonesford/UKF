@@ -157,4 +157,7 @@ void EKF::UpdateEKF(const VectorXd &z) {
   P_ = (I - K * H_) * P_;
 }
 
+/**
+ * Returns the type of Kalman Filter that's been implemented
+ */
 const char *EKF::get_kf_type(void) { return "EKF"; }

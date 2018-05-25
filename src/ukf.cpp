@@ -45,10 +45,10 @@ UKF::UKF() {
    ****/
 
   // Process noise standard deviation longitudinal acceleration in m/s^2
-  std_a_ = .55;
+  std_a_ = .8;
 
   // Process noise standard deviation yaw acceleration in rad/s^2
-  std_yawdd_ = 1;
+  std_yawdd_ = .75;
 
   // initial state vector
   x_ = VectorXd(5);
@@ -122,11 +122,11 @@ void UKF::ProcessMeasurement(const MeasurementPackage& measurement_pack) {
         x_(0) = px_py(0);
         x_(1) = px_py(1);
         // clang-format off
-        P_ << .3,  0, 0, 0, 0,
-              0, .3, 0, 0, 0,
-              0,  0, 1, 0, 0,
-              0,  0, 0, 1, 0,
-              0,  0, 0, 0, 1;
+        P_ << 0.2, 0.0,   0.0,   0.0, 0.0,
+              0.0, 0.009, 0.0,   0.0, 0.0,
+              0.0, 0.0,   0.283, 0.0, 0.0,
+              0.0, 0.0,   0.0,   2.0, 0.0,
+              0.0, 0.0,   0.0,   0.0, 0.0;
         // clang-format on
         break;
       }
@@ -135,11 +135,11 @@ void UKF::ProcessMeasurement(const MeasurementPackage& measurement_pack) {
         x_(0) = measurement_pack.raw_measurements_(0);
         x_(1) = measurement_pack.raw_measurements_(1);
         // clang-format off
-        P_ << .15,  0, 0, 0, 0,
-               0, .15, 0, 0, 0,
-               0,  0, .3, 0, 0,
-               0,  0, 0, 20, 0,
-               0,  0, 0, 0, 20;
+        P_ <<  0.075, 0.0,   0.0, 0.0,  0.0,
+               0.0,   0.075, 0.0, 0.0,  0.0,
+               0.0,   0.0,   2.7, 0.0,  0.0,
+               0.0,   0.0,   0.0, 20.0, 0.0,
+               0.0,   0.0,   0.0, 0.0,  20.0;
         // clang-format on
         break;
       }
@@ -334,4 +334,7 @@ void UKF::UpdateRadar(VectorXd z) {
   }
 }
 
+/**
+ * Returns the type of Kalman Filter that's been implemented
+ */
 const char* UKF::get_kf_type(void) { return "UKF"; }
