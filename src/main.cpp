@@ -91,36 +91,30 @@ int main(int argc, char *argv[]) {
             if (!strcmp(argv[inx], "-f")) {
                 logging = true;
                 write_header = true;
-            } else if (!kf_inited) {
-                KF = kf_type(argv[inx]);
-                kf_inited = true;
-            }
-            if (!strcmp(argv[inx], "-tu")) {
+            } else if (!strcmp(argv[inx], "-tu")) {
                 run_test_predictUKF(KF);
                 run_test_UpdateRadar(KF);
                 if (KF != NULL) {
                     delete KF;
                 }
                 return 0;
-            }
-            if (!strcmp(argv[inx], "-v")) {
+            } else if (!strcmp(argv[inx], "-v")) {
                 be_verbose = true;
-            }
-            if (!strcmp(argv[inx], "-r")) {
+            } else if (!strcmp(argv[inx], "-r")) {
                 radar_only = true;
-            }
-            if (!strcmp(argv[inx], "-l")) {
+            } else if (!strcmp(argv[inx], "-l")) {
                 laser_only = true;
-            }
-            if (!strcmp(argv[inx], "-n")) {
+            } else if (!strcmp(argv[inx], "-n")) {
                 print_nis = true;
-            }
-            if (!strcmp(argv[inx], "-hunt")) {
+            } else if (!strcmp(argv[inx], "-hunt")) {
                 hunting = true;
+            } else {
+                KF = kf_type(argv[inx]);
             }
         }
-    } else {
-        KF = new UKF();
+    }
+    if (KF == NULL){
+      KF = new UKF();
     }
 
     // pass options to the Kalman filter

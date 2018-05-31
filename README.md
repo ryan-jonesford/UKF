@@ -56,6 +56,9 @@ This project utilizes a Kalman filter to estimate the state of a moving object o
        -n
               Print NIS info to console
 
+       -tu 
+              Run tests for UKF updateRadar and PredictUKF functions
+
        -hunt 
               Used for the catch the runaway car simulation
 
