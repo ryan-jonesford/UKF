@@ -1,49 +1,47 @@
 #ifndef EKF_H_
 #define EKF_H_
 
-#include <vector>
-#include <string>
 #include <fstream>
+#include <string>
+#include <vector>
 #include "kalman_filter.h"
 
-class EKF: public KalmanFilter {
-public:
-  /**
-  * Constructor.
-  */
-  EKF();
+class EKF : public KalmanFilter {
+   public:
+    /**
+     * Constructor.
+     */
+    EKF();
 
-  /**
-  * Destructor.
-  */
-  virtual ~EKF();
-  
-  /**
-   * ProcessMeasurement
-   * @param meas_package The latest measurement data of either radar or laser
-  **/
-  void ProcessMeasurement(const MeasurementPackage &measurement_pack);
+    /**
+     * Destructor.
+     */
+    virtual ~EKF();
 
-  /**
-   * Updates the state by using Extended Kalman Filter equations
-   * @param z The measurement at k+1
-   */
-  void UpdateEKF(const Eigen::VectorXd &z);
+    /**
+     * ProcessMeasurement
+     * @param meas_package The latest measurement data of either radar or laser
+     **/
+    void ProcessMeasurement(const MeasurementPackage &measurement_pack);
 
-  /**
-   * Returns the type of kalman filter implemented
-   */
-  const char* get_kf_type(void);
-  
-private: 
+    /**
+     * Updates the state by using Extended Kalman Filter equations
+     * @param z The measurement at k+1
+     */
+    void UpdateEKF(const Eigen::VectorXd &z);
 
-  Eigen::MatrixXd R_laser_;
-  Eigen::MatrixXd R_radar_;
-  Eigen::MatrixXd H_laser_;
+    /**
+     * Returns the type of kalman filter implemented
+     */
+    const char *get_kf_type(void);
 
-  // Process and measurement noise
-  int noise_ax_, noise_ay_;
+   private:
+    Eigen::MatrixXd R_laser_;
+    Eigen::MatrixXd R_radar_;
+    Eigen::MatrixXd H_laser_;
 
+    // Process and measurement noise
+    int noise_ax_, noise_ay_;
 };
 
 #endif /* EKF_H_ */

@@ -1,14 +1,13 @@
 #ifndef KALMAN_FILTER_H_
 #define KALMAN_FILTER_H_
 #include "Eigen/Dense"
-#include "tools.h"
 #include "measurement_package.h"
+#include "tools.h"
 
-static const int MAX_DT = 120; // 2min
+static const int MAX_DT = 120;  // 2min
 
 class KalmanFilter {
-public:
-
+   public:
     // state vector
     Eigen::VectorXd x_;
 
@@ -30,7 +29,7 @@ public:
     // measurement covariance matrix
     Eigen::MatrixXd R_;
 
-    /** 
+    /**
      * Constructor
      */
     KalmanFilter();
@@ -39,18 +38,6 @@ public:
      * Destructor
      */
     virtual ~KalmanFilter();
-
-    /**
-     * Init Initializes Kalman filter
-     * @param x_in Initial state
-     * @param P_in Initial state covariance
-     * @param F_in Transition matrix
-     * @param H_in Measurement matrix
-     * @param R_in Measurement covariance matrix
-     * @param Q_in Process covariance matrix
-     */
-    void Init(Eigen::VectorXd &x_in, Eigen::MatrixXd &P_in, Eigen::MatrixXd &F_in,
-    Eigen::MatrixXd &H_in, Eigen::MatrixXd &R_in, Eigen::MatrixXd &Q_in);
 
     /**
      * Prediction Predicts the state and the state covariance
@@ -68,13 +55,14 @@ public:
     /**
      * Returns the type of kalman filter implemented
      */
-    virtual const char* get_kf_type( void ){ return " "; }
+    virtual const char *get_kf_type(void) { return " "; }
 
     /**
      * Run the whole flow of the Kalman Filter from here. Must be implemented by
      * children classes
      */
-    virtual void ProcessMeasurement(const MeasurementPackage &measurement_pack){};
+    virtual void ProcessMeasurement(
+        const MeasurementPackage &measurement_pack){};
 
     // if this is false, laser measurements will be ignored (except for init)
     bool use_laser_;
@@ -87,9 +75,8 @@ public:
 
     // if true, prints the nis results to the console
     bool print_nis_;
-    
 
-  protected:
+   protected:
     Tools tools;
 
     //* initially set to false, set to true in first call of ProcessMeasurement

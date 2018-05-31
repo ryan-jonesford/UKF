@@ -1,7 +1,7 @@
-# Extended Kalman Filter Project
+# Unscented Kalman Filter
 Self-Driving Car Engineer Nanodegree Program
 
-This project utilizes a Kalman filter to estimate the state of a moving object of interest with noisy Lidar and radar measurements. The project obtains RMSE values that are lower than the tolerance outlined in the project rubric (.11 for positional x,y estimations and 0.52 for motion v_x and v_y estimations). 
+This project utilizes a Kalman filter to estimate the state of a moving object of interest with noisy Lidar and radar measurements. 
 
 *This project requires the Udacity Term 2 Simulator which can be downloaded [here](https://github.com/udacity/self-driving-car-sim/releases)*
 
@@ -13,23 +13,7 @@ This project utilizes a Kalman filter to estimate the state of a moving object o
 2. cd build
 3. cmake ..
 4. make
-5. ./ExtendedKF
-
-*Here is the main protocol that main.cpp uses for uWebSocketIO in communicating with the simulator.*
-
-*INPUT: values provided by the simulator to the c++ program
-*
-*["sensor_measurement"] => the measurement that the simulator observed (either lidar or radar)*
-
-
-*OUTPUT: values provided by the c++ program to the simulator*
-
-*["estimate_x"] <= kalman filter estimated position x
-["estimate_y"] <= kalman filter estimated position y
-["rmse_x"]
-["rmse_y"]
-["rmse_vx"]
-["rmse_vy"]*
+5. ./KF [args]
 
 ---
 
@@ -46,9 +30,33 @@ This project utilizes a Kalman filter to estimate the state of a moving object o
   * Mac: same deal as make - [install Xcode command line tools](https://developer.apple.com/xcode/features/)
   * Windows: recommend using [MinGW](http://www.mingw.org/)
 
-[//]: # (Image References)
+# Running the program
+### SYNOPSIS
 
-[EKF_map]: ./Docs/EKF_map.png "Extended Kalman Filter Algorithm Map"
+       KS [OPTION]... 
+
+### DESCRIPTION
+       Runs a Kalman filter to be used in the Udacity Term2 Simulator
+       -v
+              Verbose mode, Prints out an obnoxious amount of debug statements
+
+       -e
+              Run an extended kalman filter
+
+       -r
+              Use Radar only
+
+       -l
+              Use Laser only
+
+       -f
+              Print to log file ./out_log.csv
+
+       -n
+              Print NIS info to console
+
+       -hunt 
+              Used for the catch the runaway car simulation
 
 ## Accuracy
 The RSME values for px,py,vx,vy vs ground truth settle out to less than 0.11,0.11,0.52 and 0.52 respectively. 
