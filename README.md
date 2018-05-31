@@ -13,7 +13,7 @@ This project utilizes a Kalman filter to estimate the state of a moving object o
 2. cd build
 3. cmake ..
 4. make
-5. ./KF [args]
+5. ./KF [OPTIONS]
 
 ---
 
@@ -33,12 +33,13 @@ This project utilizes a Kalman filter to estimate the state of a moving object o
 # Running the program
 ### SYNOPSIS
 
-       KS [OPTION]... 
+       KF [OPTIONS]... 
 
 ### DESCRIPTION
-       Runs a Kalman filter to be used in the Udacity Term2 Simulator
+       Runs a Kalman filter to be used in the Udacity Term2 Simulator, runs unscented Kalman filter by default if no options are given
+
        -v
-              Verbose mode, Prints out an obnoxious amount of debug statements
+              Verbose mode. Prints out an obnoxious amount of debug statements to the console
 
        -e
               Run an extended kalman filter
@@ -58,16 +59,32 @@ This project utilizes a Kalman filter to estimate the state of a moving object o
        -hunt 
               Used for the catch the runaway car simulation
 
+# Program Evaluation
 ## Accuracy
-The RSME values for px,py,vx,vy vs ground truth settle out to less than 0.11,0.11,0.52 and 0.52 respectively. 
+The RSME values for px,py,vx,vy vs ground truth settle out to less than 0.07,0.09,0.3 and 0.3 respectively. The percentage of NIS values for  radar below 7.81 is almost 96% and for Laser that are below 5.99 is almost 98%.  
 
 ## Program flow
-The program follows the flow as outlined in this diagram ![EKF_map][EKF_map]
-Where upon the first measurement the position is recorded as reported to initialize the state vector, converting polar coordinates to Cartesian if the first measurement came from Radar, and on subsequent time steps making predictions using the previous values and timestep. After the prediction is made the update step uses different functions depending on the sensor type. Since they see the world differently, the measurements need to be handled differently.
+The program follows the flow as follows for the Unscented Kalman Filter:
+The first measurement of the position is recorded as reported to initialize the state vector, converting polar coordinates to Cartesian if the first measurement came from Radar, and on subsequent time steps making predictions using the previous values and timestep. The covarience matricies are also created when the first measurement comes in and are different if it is a laser or a radar measurement. After the prediction is made the update step uses different functions depending on the sensor type. Since they see the world differently, the measurements need to be handled differently.
 
-The Lidar measurement using a linear update method whereas the radar uses a non-linear one, necessitating the need for a jacobian matrix which is handled in tools.cpp.
+The Lidar measurement uses a linear update method whereas the radar uses a non-linear one, necessitating the need for creating sigma points.
 
 ## Code Efficiency
 The code strives to be clean and readable, and to avoid loops, and creating unnecessary complexity whether through the use of loops or control flow checks. 
 
-Note: *Italicized* sections and the "Other Important Dependencies" section were written by Udacity. The vast majority of code in main.cpp was written by Udacity.
+## Catching the runnaway car
+There are many strategies to do this. I chose a simple one to implement. It takes the first place that the car was detected and sits there and waits for it to come back around. Once the car gets close enough it drives towards it and catches it. It is able to opperate with a large amount of error in the measurements when using the UKF and is also successful with the EKF (to run with EKF run './Kf -hunt -e')
+
+## Comparisons
+The UKF finds itself to be more accurate than the EKF, in fact using the laser values only, the UKF is as accurate as the EKF. 
+
+The following table shows the results (gt = ground truth):
+| Filter        | px vs gt  | py vs gt | vx vs gt | vy vs gt |
+| ------------- |:---------:| --------:| --------:| --------:|
+| UKF           | .065      |   .083   |   .277   |   .277   |
+| EKF           | .096      |   .085   |   .415   |   .432   |
+| UKF Laser only| .096      |   .097   |   .462   |   .288   |
+| UKF Radar only| .156      |   .224   |   .425   |   .676   |
+
+
+Note: *Italicized* sections and the "Other Important Dependencies" section were written by Udacity. The majority of code in main.cpp was written by Udacity.
