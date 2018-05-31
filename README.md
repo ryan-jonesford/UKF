@@ -79,6 +79,7 @@ There are many strategies to do this. I chose a simple one to implement. It take
 The UKF finds itself to be more accurate than the EKF, in fact using the laser values only, the UKF is as accurate as the EKF. 
 
 The following table shows the results (gt = ground truth):
+
 | Filter        | px vs gt  | py vs gt | vx vs gt | vy vs gt |
 | ------------- |:---------:| --------:| --------:| --------:|
 | UKF           | .065      |   .083   |   .277   |   .277   |
